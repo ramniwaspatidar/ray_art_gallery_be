@@ -1,12 +1,11 @@
 import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import { S3Service } from './s3.service';
+import { v2 as cloudinary } from 'cloudinary';
+import * as streamifier from 'streamifier';
 import { UploadFileDto, UploadResponseDto } from './dto/upload.dto';
 
 @Injectable()
 export class UploadService {
   private readonly logger = new Logger(UploadService.name);
-
-  constructor(private readonly s3Service: S3Service) {}
 
   async uploadFile(file: Express.Multer.File, uploadDto: UploadFileDto): Promise<UploadResponseDto> {
     try {
@@ -14,26 +13,20 @@ export class UploadService {
         throw new BadRequestException('No file provided');
       }
 
-      // Validate file type and size
       this.validateFile(file);
 
-      // Generate unique key for S3
-      const key = this.generateFileKey(file.originalname, uploadDto.category);
+      const result = await this.uploadToCloudinary(file, uploadDto.category);
 
-      // Upload to S3
-      const s3Result = await this.s3Service.uploadFile(file, key);
-
-      // Return response
       return {
-        url: s3Result.Location,
-        key: s3Result.Key,
+        url: result.secure_url,
+        key: result.public_id,
         filename: file.originalname,
         size: file.size,
         mimetype: file.mimetype,
         uploadedAt: new Date(),
       };
     } catch (error) {
-      this.logger.error('Error uploading file:', error);
+      this.logger.error('Error uploading file to Cloudinary:', error);
       throw error;
     }
   }
@@ -47,43 +40,36 @@ export class UploadService {
       const uploadPromises = files.map(file => this.uploadFile(file, uploadDto));
       return await Promise.all(uploadPromises);
     } catch (error) {
-      this.logger.error('Error uploading multiple files:', error);
+      this.logger.error('Error uploading multiple files to Cloudinary:', error);
       throw error;
     }
   }
 
-  async deleteFile(key: string): Promise<void> {
+  async deleteFile(publicId: string): Promise<void> {
     try {
-      await this.s3Service.deleteFile(key);
-      this.logger.log(`File deleted successfully: ${key}`);
+      await cloudinary.uploader.destroy(publicId);
+      this.logger.log(`File deleted successfully from Cloudinary: ${publicId}`);
     } catch (error) {
-      this.logger.error('Error deleting file:', error);
+      this.logger.error('Error deleting file from Cloudinary:', error);
       throw error;
     }
   }
 
-  async getSignedUrl(key: string): Promise<string> {
-    try {
-      return await this.s3Service.getSignedUrl(key);
-    } catch (error) {
-      this.logger.error('Error getting signed URL:', error);
-      throw error;
-    }
-  }
+  private async uploadToCloudinary(file: Express.Multer.File, folder?: string): Promise<any> {
+    return new Promise((resolve, reject) => {
+      const uploadStream = cloudinary.uploader.upload_stream(
+        {
+          folder: folder || 'uploads',
+          resource_type: 'auto',
+        },
+        (error, result) => {
+          if (error) return reject(error);
+          resolve(result);
+        }
+      );
 
-  async listFiles(category?: string): Promise<any[]> {
-    try {
-      const files = await this.s3Service.listFiles(category);
-      return files.map(file => ({
-        key: file.Key,
-        size: file.Size,
-        lastModified: file.LastModified,
-        etag: file.ETag,
-      }));
-    } catch (error) {
-      this.logger.error('Error listing files:', error);
-      throw error;
-    }
+      streamifier.createReadStream(file.buffer).pipe(uploadStream);
+    });
   }
 
   private validateFile(file: Express.Multer.File): void {
@@ -107,15 +93,5 @@ export class UploadService {
     if (!allowedMimeTypes.includes(file.mimetype)) {
       throw new BadRequestException(`File type '${file.mimetype}' not allowed`);
     }
-  }
-
-  private generateFileKey(filename: string, category?: string): string {
-    const timestamp = Date.now();
-    const randomString = Math.random().toString(36).substring(2, 15);
-    const extension = filename.split('.').pop();
-    const baseName = filename.split('.').slice(0, -1).join('.');
-    
-    const prefix = category ? `${category}/` : 'uploads/';
-    return `${prefix}${timestamp}-${randomString}-${baseName}.${extension}`;
   }
 }

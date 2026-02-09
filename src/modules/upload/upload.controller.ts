@@ -75,32 +75,6 @@ export class UploadController {
     }
   }
 
-  @Get('signed-url/:key')
-  async getSignedUrl(@Param('key') key: string): Promise<{ url: string }> {
-    try {
-      const decodedKey = decodeURIComponent(key);
-      const url = await this.uploadService.getSignedUrl(decodedKey);
-      return { url };
-    } catch (error) {
-      throw new HttpException(
-        error.message || 'Failed to generate signed URL',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
-  @Get('files')
-  async listFiles(@Query('category') category?: string): Promise<any[]> {
-    try {
-      return await this.uploadService.listFiles(category);
-    } catch (error) {
-      throw new HttpException(
-        error.message || 'Failed to list files',
-        error.status || HttpStatus.INTERNAL_SERVER_ERROR,
-      );
-    }
-  }
-
   @Get('health')
   async healthCheck(): Promise<{ status: string; timestamp: string }> {
     return {
