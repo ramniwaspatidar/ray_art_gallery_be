@@ -1,12 +1,12 @@
 import { IsEnum, IsOptional, IsString, IsInt, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { ProductCategory } from '../product.model';
+import { AdminRole } from '../admin.model';
 
-export class GetProductsFilterDto {
+export class GetAdminsFilterDto {
   @ApiPropertyOptional({
-    description: 'Search products by name',
-    example: 'mandala art',
+    description: 'Search admins by name or email',
+    example: 'john',
     type: String
   })
   @IsOptional()
@@ -14,22 +14,13 @@ export class GetProductsFilterDto {
   search?: string;
 
   @ApiPropertyOptional({
-    description: 'Filter by product category',
-    enum: ProductCategory,
-    example: ProductCategory.MANDALA
+    description: 'Filter by admin role',
+    enum: AdminRole,
+    example: AdminRole.ADMIN
   })
   @IsOptional()
-  @IsEnum(ProductCategory)
-  category?: ProductCategory;
-
-  @ApiPropertyOptional({
-    description: 'Filter by sub-category',
-    example: 'Wall Art',
-    type: String
-  })
-  @IsOptional()
-  @IsString()
-  subCategory?: string;
+  @IsEnum(AdminRole)
+  role?: AdminRole;
 
   @ApiPropertyOptional({
     description: 'Page number for pagination',

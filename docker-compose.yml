@@ -1,10 +1,14 @@
 version: '3.8'
+
 services:
   db:
     container_name: raygallery_db
     image: postgres:14
     ports:
-      - '5432:5432'
+    - "5433:5432"
+
+
+
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: Ram@#123$
@@ -12,5 +16,17 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  pgadmin:
+    container_name: raygallery_pgadmin
+    image: dpage/pgadmin4
+    ports:
+      - "5050:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    depends_on:
+      - db
+
 volumes:
   postgres_data:
+

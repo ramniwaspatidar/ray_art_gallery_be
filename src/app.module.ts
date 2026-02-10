@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { UploadModule } from './modules/upload/upload.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ProductModule } from './modules/product/product.module';
+import { AdminModule } from './modules/admin/admin.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -32,6 +33,7 @@ import { APP_GUARD } from '@nestjs/core';
     }),
     UploadModule,
     ProductModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [

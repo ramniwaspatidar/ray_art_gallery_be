@@ -1,38 +1,38 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductCategory } from '../product.model';
 
-export class CreateProductDto {
-  @ApiProperty({
+export class UpdateProductDto {
+  @ApiPropertyOptional({
     description: 'Product name',
-    example: 'iPhone 15 Pro',
+    example: 'Updated iPhone 15 Pro',
     type: String
   })
   @IsString()
-  @IsNotEmpty()
-  name: string;
+  @IsOptional()
+  name?: string;
 
   @ApiPropertyOptional({
     description: 'Product description',
-    example: 'Latest iPhone with advanced features',
+    example: 'Updated description with new features',
     type: String
   })
   @IsString()
   @IsOptional()
   description?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Product price',
-    example: 999.99,
+    example: 899.99,
     type: Number
   })
   @IsNumber()
-  @IsNotEmpty()
-  price: number;
+  @IsOptional()
+  price?: number;
 
   @ApiPropertyOptional({
     description: 'Original price before discount',
-    example: 1199.99,
+    example: 1099.99,
     type: Number
   })
   @IsNumber()
@@ -41,28 +41,28 @@ export class CreateProductDto {
 
   @ApiPropertyOptional({
     description: 'Product image URL',
-    example: 'https://example.com/image.jpg',
+    example: 'https://example.com/updated-image.jpg',
     type: String
   })
   @IsString()
   @IsOptional()
   imageUrl?: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Product category',
     enum: ProductCategory,
-    example: ProductCategory.MANDALA
+    example: ProductCategory.RESIN
   })
   @IsEnum(ProductCategory)
-  @IsNotEmpty()
-  category: ProductCategory;
+  @IsOptional()
+  category?: ProductCategory;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Product sub-category',
-    example: 'Smartphones',
+    example: 'Updated Smartphones',
     type: String
   })
   @IsString()
-  @IsNotEmpty()
-  subCategory: string;
+  @IsOptional()
+  subCategory?: string;
 }
