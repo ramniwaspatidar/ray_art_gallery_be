@@ -15,12 +15,12 @@ export class GetProductsFilterDto {
 
   @ApiPropertyOptional({
     description: 'Filter by product category',
-    enum: ProductCategory,
-    example: ProductCategory.MANDALA
+    example: 'Mandala',
+    type: String,
   })
   @IsOptional()
-  @IsEnum(ProductCategory)
-  category?: ProductCategory;
+  @IsString()
+  category?: string;
 
   @ApiPropertyOptional({
     description: 'Filter by sub-category',

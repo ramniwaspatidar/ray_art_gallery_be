@@ -6,6 +6,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { ProductModule } from './modules/product/product.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { ContactUsModule } from './modules/contact-us/contact-us.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
@@ -28,12 +29,13 @@ import { APP_GUARD } from '@nestjs/core';
       inject: [ConfigService],
       useFactory: (config: ConfigService) => [{
         ttl: config.get<number>('THROTTLE_TTL') || 60000,
-        limit: config.get<number>('THROTTLE_LIMIT') || 10,
+        limit: parseInt(config.get('THROTTLE_LIMIT') || '') || 10,
       }],
     }),
     UploadModule,
     ProductModule,
     AdminModule,
+    ContactUsModule,
   ],
   controllers: [AppController],
   providers: [

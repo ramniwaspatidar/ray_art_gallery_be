@@ -8,7 +8,17 @@ async function bootstrap() {
   
   // Enable CORS for frontend integration
   app.enableCors({
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+    origin: [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      'http://localhost:3002',
+      'http://localhost:5173',
+      'https://www.rayart.in',
+      'https://rayart.in',
+      'https://admin.rayart.in',
+      
+      ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+    ],
     credentials: true,
   });
   
