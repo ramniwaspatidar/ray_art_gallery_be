@@ -16,6 +16,7 @@ async function bootstrap() {
       'https://www.rayart.in',
       'https://rayart.in',
       'https://admin.rayart.in',
+      'https://www.admin.rayart.in',
       
       ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
     ],
