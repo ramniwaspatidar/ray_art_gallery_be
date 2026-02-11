@@ -7,20 +7,29 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   
   // Enable CORS for frontend integration
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:3002',
+    'http://localhost:5173',
+    'https://www.rayart.in',
+    'https://rayart.in',
+    'https://admin.rayart.in',
+    'https://www.admin.rayart.in',
+    ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
+  ];
+
   app.enableCors({
-    origin: [
-      'http://localhost:3000',
-      'http://localhost:3001',
-      'http://localhost:3002',
-      'http://localhost:5173',
-      'https://www.rayart.in',
-      'https://rayart.in',
-      'https://admin.rayart.in',
-      'https://www.admin.rayart.in',
-      
-      ...(process.env.FRONTEND_URL ? [process.env.FRONTEND_URL] : []),
-    ],
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(null, false);
+      }
+    },
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
+    optionsSuccessStatus: 200,
   });
   
   // Global validation pipe
