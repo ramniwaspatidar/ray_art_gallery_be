@@ -37,11 +37,11 @@ import { APP_GUARD } from '@nestjs/core';
 
         return {
           dialect: 'postgres',
-          host: configService.get<string>('DB_HOST') || 'localhost',
+          host: configService.get<string>('DB_HOST') || 'dpg-d67li8esb7us73eb13vg-a',
           port: parseInt(configService.get<string>('DB_PORT') || '5432', 10),
-          username: configService.get<string>('DB_USER') || 'postgres',
-          password: configService.get<string>('DB_PASSWORD') || 'ram@#123$',
-          database: configService.get<string>('DB_NAME') || 'raygallery',
+          username: configService.get<string>('DB_USER') || 'ray_art_db_user',
+          password: configService.get<string>('DB_PASSWORD') || 'RGXmZSXioQgUZYVSnIqevoddugfQipF0',
+          database: configService.get<string>('DB_NAME') || 'ray_art_db_user',
           autoLoadModels: true,
           synchronize: true, // Set to false in production
         };
