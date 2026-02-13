@@ -217,63 +217,75 @@ export class AdminService {
       accessToken?: string;
     };
   }> {
-    const admin = await this.adminModel.findOne({
-      where: { email: validateAdminDto.email },
-      raw: true
-    });
+    try {
+      console.log('Validating admin with email:', validateAdminDto.email);
+      const admin = await this.adminModel.findOne({
+        where: { email: validateAdminDto.email },
+        raw: true
+      });
 
-    if (!admin) {
+      if (!admin) {
+        console.warn('Admin validation failed: Email not found');
+        return {
+          success: false,
+          message: 'Invalid email or password',
+          data: {
+            admin: null,
+          },
+        };
+      }
+
+      // Check if password exists in the retrieved admin record
+      if (!admin.password || !validateAdminDto.password) {
+        console.warn('Admin validation failed: Missing password in record or input');
+        return {
+          success: false,
+          message: 'Invalid email or password',
+          data: {
+            admin: null,
+          },
+        };
+      }
+
+      // Compare password with hashed password
+      const isPasswordValid = await bcrypt.compare(validateAdminDto.password, admin.password);
+
+      if (!isPasswordValid) {
+        console.warn('Admin validation failed: Invalid password');
+        return {
+          success: false,
+          message: 'Invalid email or password',
+          data: {
+            admin: null,
+          },
+        };
+      }
+
+      // Generate JWT token
+      const payload = {
+        sub: admin.id,
+        email: admin.email,
+        role: admin.role,
+      };
+      
+      console.log('Generating JWT token for admin:', admin.id);
+      const accessToken = this.jwtService.sign(payload);
+
+      // Fetch the full admin instance for return
+      const adminInstance = await this.adminModel.findByPk(admin.id);
+
+      console.log('Admin validated successfully:', admin.id);
       return {
-        success: false,
-        message: 'Invalid email or password',
+        success: true,
+        message: 'Admin validated successfully',
         data: {
-          admin: null,
+          admin: adminInstance,
+          accessToken,
         },
       };
+    } catch (error) {
+      console.error('Error in validateAdmin service:', error);
+      throw error; // Re-throw to let the controller/filter handle it, but now we have logs
     }
-
-    // Check if password exists in the retrieved admin record
-    if (!admin.password || !validateAdminDto.password) {
-      return {
-        success: false,
-        message: 'Invalid email or password',
-        data: {
-          admin: null,
-        },
-      };
-    }
-
-    // Compare password with hashed password
-    const isPasswordValid = await bcrypt.compare(validateAdminDto.password, admin.password);
-
-    if (!isPasswordValid) {
-      return {
-        success: false,
-        message: 'Invalid email or password',
-        data: {
-          admin: null,
-        },
-      };
-    }
-
-    // Generate JWT token
-    const payload = {
-      sub: admin.id,
-      email: admin.email,
-      role: admin.role,
-    };
-    const accessToken = this.jwtService.sign(payload);
-
-    // Fetch the full admin instance for return
-    const adminInstance = await this.adminModel.findByPk(admin.id);
-
-    return {
-      success: true,
-      message: 'Admin validated successfully',
-      data: {
-        admin: adminInstance,
-        accessToken,
-      },
-    };
   }
 }

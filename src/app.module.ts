@@ -15,15 +15,38 @@ import { APP_GUARD } from '@nestjs/core';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    SequelizeModule.forRoot({
-      dialect: 'postgres',
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432', 10) || 5432,
-      username: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'ram@#123$',
-      database: process.env.DB_NAME || 'raygallery',
-      autoLoadModels: true,
-      synchronize: true, // Set to false in production
+    SequelizeModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const databaseUrl = configService.get<string>('DATABASE_URL');
+        
+        if (databaseUrl) {
+          return {
+            uri: databaseUrl,
+            dialect: 'postgres',
+            autoLoadModels: true,
+            synchronize: true, // Set to false in production
+            dialectOptions: {
+              ssl: {
+                require: true,
+                rejectUnauthorized: false,
+              },
+            },
+          };
+        }
+
+        return {
+          dialect: 'postgres',
+          host: configService.get<string>('DB_HOST') || 'localhost',
+          port: parseInt(configService.get<string>('DB_PORT') || '5432', 10),
+          username: configService.get<string>('DB_USER') || 'postgres',
+          password: configService.get<string>('DB_PASSWORD') || 'ram@#123$',
+          database: configService.get<string>('DB_NAME') || 'raygallery',
+          autoLoadModels: true,
+          synchronize: true, // Set to false in production
+        };
+      },
+      inject: [ConfigService],
     }),
     ThrottlerModule.forRootAsync({
       inject: [ConfigService],
