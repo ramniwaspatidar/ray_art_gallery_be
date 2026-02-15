@@ -6,11 +6,12 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AdminController } from './admin.controller';
 import { AdminService } from './admin.service';
 import { Admin } from './admin.model';
+import { Newsletter } from './newsletter.model';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([Admin]),
+    SequelizeModule.forFeature([Admin, Newsletter]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

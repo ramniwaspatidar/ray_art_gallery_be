@@ -4,8 +4,11 @@ import { AdminService } from './admin.service';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { ValidateAdminDto } from './dto/validate-admin.dto';
+import { CreateNewsletterDto } from './dto/create-newsletter.dto';
 import { GetAdminsFilterDto } from './dto/get-admins-filter.dto';
+import { GetNewslettersFilterDto } from './dto/get-newsletters-filter.dto';
 import { Admin } from './admin.model';
+import { Newsletter } from './newsletter.model';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { Public } from './decorators/public.decorator';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -102,6 +105,77 @@ export class AdminController {
     };
   }> {
     return this.adminService.validateAdmin(validateAdminDto);
+  }
+
+  @Post('newsletter')
+  @Public()
+  @ApiOperation({ summary: 'Subscribe to newsletter' })
+  @ApiResponse({
+    status: 201,
+    description: 'Subscribed successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Successfully subscribed to the newsletter' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid email or already subscribed'
+  })
+  subscribeToNewsletter(@Body() createNewsletterDto: CreateNewsletterDto): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    return this.adminService.subscribeToNewsletter(createNewsletterDto.email);
+  }
+
+  @Get('newsletter')
+  @ApiOperation({ summary: 'Get all newsletter subscriptions with pagination' })
+  @ApiResponse({
+    status: 200,
+    description: 'Newsletters retrieved successfully',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean', example: true },
+        message: { type: 'string', example: 'Newsletters fetched successfully' },
+        data: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/Newsletter' }
+        },
+        pagination: {
+          type: 'object',
+          properties: {
+            currentPage: { type: 'number', example: 1 },
+            itemsPerPage: { type: 'number', example: 10 },
+            hasMore: { type: 'boolean', example: false },
+            offset: { type: 'number', example: 0 },
+            total: { type: 'number', example: 50 }
+          }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized - JWT token required'
+  })
+  getNewsletters(@Query() filterDto: GetNewslettersFilterDto): Promise<{
+    success: boolean;
+    message: string;
+    data: Newsletter[];
+    pagination: {
+      currentPage: number;
+      itemsPerPage: number;
+      hasMore: boolean;
+      offset: number;
+      total: number;
+    };
+  }> {
+    return this.adminService.findAllNewsletters(filterDto);
   }
 
   @Get()

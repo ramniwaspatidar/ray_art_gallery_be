@@ -2,10 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
 import { JwtService } from '@nestjs/jwt';
 import { Admin } from './admin.model';
+import { Newsletter } from './newsletter.model';
 import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { ValidateAdminDto } from './dto/validate-admin.dto';
 import { GetAdminsFilterDto } from './dto/get-admins-filter.dto';
+import { GetNewslettersFilterDto } from './dto/get-newsletters-filter.dto';
 import { Op } from 'sequelize';
 import * as bcrypt from 'bcrypt';
 
@@ -14,8 +16,89 @@ export class AdminService {
   constructor(
     @InjectModel(Admin)
     private adminModel: typeof Admin,
+    @InjectModel(Newsletter)
+    private newsletterModel: typeof Newsletter,
     private jwtService: JwtService,
   ) {}
+
+  async subscribeToNewsletter(email: string): Promise<{
+    success: boolean;
+    message: string;
+  }> {
+    try {
+      // Check if email already exists
+      const existingSubscription = await this.newsletterModel.findOne({
+        where: { email }
+      });
+
+      if (existingSubscription) {
+        return {
+          success: false,
+          message: 'Email is already subscribed to the newsletter',
+        };
+      }
+
+      await this.newsletterModel.create({ email });
+
+      return {
+        success: true,
+        message: 'Successfully subscribed to the newsletter',
+      };
+    } catch (error) {
+      // Handle validation error if it slips through
+      if (error.name === 'SequelizeValidationError') {
+        return {
+          success: false,
+          message: 'Invalid email address',
+        };
+      }
+      throw error;
+    }
+  }
+
+  async findAllNewsletters(filterDto: GetNewslettersFilterDto): Promise<{
+    success: boolean;
+    message: string;
+    data: Newsletter[];
+    pagination: {
+      currentPage: number;
+      itemsPerPage: number;
+      hasMore: boolean;
+      offset: number;
+      total: number;
+    };
+  }> {
+    const { search, page = 1, limit = 10 } = filterDto;
+    const where: any = {};
+
+    if (search) {
+      where.email = { [Op.iLike]: `%${search}%` };
+    }
+
+    const offset = (page - 1) * limit;
+
+    const result = await this.newsletterModel.findAndCountAll({
+      where,
+      limit,
+      offset,
+      order: [['createdAt', 'DESC']],
+    });
+
+    const hasMore = offset + limit < result.count;
+
+    return {
+      success: true,
+      message: 'Newsletters fetched successfully',
+      data: result.rows,
+      pagination: {
+        currentPage: page,
+        itemsPerPage: limit,
+        hasMore,
+        offset,
+        total: result.count,
+      },
+    };
+  }
 
   async create(createAdminDto: CreateAdminDto): Promise<{
     success: boolean;
