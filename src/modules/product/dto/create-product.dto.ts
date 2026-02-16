@@ -40,13 +40,14 @@ export class CreateProductDto {
   originalPrice?: number;
 
   @ApiPropertyOptional({
-    description: 'Product image URL',
-    example: 'https://example.com/image.jpg',
-    type: String
+    description: 'Product image URLs',
+    example: ['https://example.com/image-1.jpg', 'https://example.com/image-2.jpg'],
+    type: [String]
   })
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  imageUrl?: string;
+  imageUrl?: string[];
 
   @ApiProperty({
     description: 'Product category',

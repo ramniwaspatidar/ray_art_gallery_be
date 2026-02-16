@@ -61,15 +61,15 @@ export class Product extends Model {
   originalPrice: number;
 
   @ApiPropertyOptional({
-    description: 'Product image URL',
-    example: 'https://example.com/mandala-art.jpg',
-    type: String
+    description: 'Product image URLs',
+    example: ['https://example.com/mandala-art-1.jpg', 'https://example.com/mandala-art-2.jpg'],
+    type: [String]
   })
   @Column({
-    type: DataType.STRING,
+    type: DataType.JSON,
     allowNull: true,
   })
-  imageUrl: string;
+  imageUrl: string[];
 
   @ApiProperty({
     description: 'Product category',

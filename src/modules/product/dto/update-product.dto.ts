@@ -40,13 +40,14 @@ export class UpdateProductDto {
   originalPrice?: number;
 
   @ApiPropertyOptional({
-    description: 'Product image URL',
-    example: 'https://example.com/updated-image.jpg',
-    type: String
+    description: 'Product image URLs',
+    example: ['https://example.com/updated-image-1.jpg', 'https://example.com/updated-image-2.jpg'],
+    type: [String]
   })
-  @IsString()
+  @IsArray()
+  @IsString({ each: true })
   @IsOptional()
-  imageUrl?: string;
+  imageUrl?: string[];
 
   @ApiPropertyOptional({
     description: 'Product category',
