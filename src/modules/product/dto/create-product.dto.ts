@@ -45,7 +45,7 @@ export class CreateProductDto {
     type: [String]
   })
   @IsArray()
-  @IsString({ each: true })
+  @IsString({ each: true, message: "MUST BE A STRING ARRAY ELEMENT" })
   @IsOptional()
   imageUrl?: string[];
 
