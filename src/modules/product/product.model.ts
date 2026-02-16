@@ -93,6 +93,17 @@ export class Product extends Model {
   })
   subCategory: string;
 
+  @ApiPropertyOptional({
+    description: 'Product features',
+    example: ['Handmade', 'Eco-friendly'],
+    type: [String]
+  })
+  @Column({
+    type: DataType.JSON,
+    allowNull: true,
+  })
+  features: string[];
+
   @ApiProperty({
     description: 'Product creation date',
     example: '2024-01-15T10:30:00Z',

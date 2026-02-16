@@ -27,6 +27,9 @@ import { APP_GUARD } from '@nestjs/core';
             dialect: 'postgres',
             autoLoadModels: true,
             synchronize: true, // Set to false in production
+            sync: {
+              alter: true,
+            },
             dialectOptions: {
               ssl: {
                 require: true,
@@ -44,7 +47,10 @@ import { APP_GUARD } from '@nestjs/core';
           password: configService.get<string>('DB_PASSWORD'),
           database: configService.get<string>('DB_NAME'),
           autoLoadModels: true,
-          synchronize: true, // Set to false in production
+            synchronize: true, // Set to false in production
+            sync: {
+              alter: true,
+            },
         };
       },
       inject: [ConfigService],

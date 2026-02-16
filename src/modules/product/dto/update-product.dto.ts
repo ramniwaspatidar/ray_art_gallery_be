@@ -1,4 +1,4 @@
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { ProductCategory } from '../product.model';
 
@@ -65,4 +65,14 @@ export class UpdateProductDto {
   @IsString()
   @IsOptional()
   subCategory?: string;
+
+  @ApiPropertyOptional({
+    description: 'Product features',
+    example: ['Water resistant', 'Long battery life'],
+    type: [String]
+  })
+  @IsArray()
+  @IsString({ each: true })
+  @IsOptional()
+  features?: string[];
 }
